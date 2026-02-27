@@ -25,6 +25,13 @@ class SpotifyPresenter {
         try {
             this.currentSong = await this.fetchCurrentSong();
             this.nextSong = await spotifyModel.fetchNextTrack();
+
+            // Periodically check user if not set
+            const userEl = document.getElementById('spotify-user');
+            if (userEl && !userEl.textContent) {
+                const userName = await spotifyModel.fetchUserProfile();
+                if (userName) userEl.textContent = "Logged as: " + userName;
+            }
         } catch (error) {
             console.error("Error fetching song:", error);
         }
@@ -32,8 +39,11 @@ class SpotifyPresenter {
 
     async fetchCurrentSong(): Promise<Song> {
         let temp = await spotifyModel.fetchCurrentTrack();
-        this.updateHTML(temp)
-        return temp
+        if (temp) {
+            this.updateHTML(temp);
+            return temp;
+        }
+        return new Song(); // Return empty song if undefined
     }
 
     private lastWebSongID: string = "";

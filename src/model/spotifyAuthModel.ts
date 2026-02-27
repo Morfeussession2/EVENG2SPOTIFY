@@ -5,7 +5,7 @@ class SpotifyAuthModel {
     get REDIRECT_URI() {
         return window.location.origin + "/";
     }
-    SCOPES = 'user-modify-playback-state user-read-playback-state';
+    SCOPES = 'user-modify-playback-state user-read-playback-state user-read-currently-playing user-read-private';
 
     /**
      * Generates a random string for state parameter

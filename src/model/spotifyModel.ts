@@ -114,7 +114,7 @@ class SpotifyModel {
         return window.location.origin + "/";
     }
     CLIENT_ID = "";
-    SCOPE = ['user-modify-playback-state', 'user-read-playback-state'];
+    SCOPE = ['user-modify-playback-state', 'user-read-playback-state', 'user-read-currently-playing', 'user-read-private'];
 
     currentSong = new Song();
     lastSong = new Song();
@@ -154,6 +154,19 @@ class SpotifyModel {
         }
     }
 
+    async fetchUserProfile(): Promise<string | undefined> {
+        if (!spotifysdk || !spotifysdk.currentUser) {
+            return undefined;
+        }
+        try {
+            const profile = await spotifysdk.currentUser.profile();
+            return profile.display_name;
+        } catch (err) {
+            console.error("Failed to fetch user profile:", err);
+            return undefined;
+        }
+    }
+
     async fetchCurrentTrack(): Promise<Song | undefined> {
         if (!spotifysdk || !spotifysdk.player) {
             console.warn("Spotify SDK or player not initialized.");
@@ -179,7 +192,7 @@ class SpotifyModel {
 
         // No item means nothing is playing, or it's paused and Spotify isn't returning it.
         if (!result || !result.item) {
-            //console.log("User is not playing anything currently.");
+            console.log("Spotify API returned no active playback (204). Play something on your Spotify app!");
             if (this.lastSong && this.lastSong.songID !== "0") {
                 this.lastSong.addisPlaying(false);
                 return this.lastSong;

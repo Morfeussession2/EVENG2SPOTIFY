@@ -3,7 +3,7 @@ import lyricsPresenter from "./lyricsPresenter";
 import { createView } from "../view/GlassesView";
 
 class PollingPresenter {
-    pollingtimeAPIs: number = 500;
+    pollingtimeAPIs: number = 2500; // 2.5 seconds is safe for Spotify
     pollingtimeLyrics: number = 100;
     private isPolling = false;
     private isPollingAPIs = false;

@@ -6,12 +6,11 @@
     <title>Even Realities App</title>
     <meta http-equiv="Content-Security-Policy"
         content="script-src 'self' 'unsafe-inline' https://accounts.scdn.co https://sdk.scdn.co blob:; worker-src 'self' blob:;" />
-  <script type="module" crossorigin src="/DisplayPlusMusic/assets/index-BPwiCs1q.js"></script>
+  <script type="module" crossorigin src="/DisplayPlusMusic/assets/index-DoHQ0PGk.js"></script>
 </head>
 
 <body>
-    <!-- Main.ts handles Spotify auth + glasses view setup on load -->
-
+    <!-- Main.ts handles Spotify auth + glasses view setup on load -->
 
 
     <!-- Main UI -->
@@ -33,6 +32,10 @@
         <button class="button" id="play-pause">Play/Pause</button>
         <button class="button" id="skip-track">Skip track</button>
     </span>
+    <span class="container" id="lyrics-container">
+        <p id='current-lyric-line'></p>
+        <p id='next-lyric-line'></p>
+    </span>
     <span id="small-button-container" class="container">
         <button class="small-button danger" id="clear-local-refresh-token">Logout</button>
     </span>
@@ -40,25 +43,27 @@
     <!-- Popup for spotify Auth -->
     <div id="spotify-auth-popup" class="popup">
         <p class="popup-title">
-            Spotify Auth required
+            Spotify Setup Required
         </p>
-        <p class="popup-label">
-            Click on 'Open login page' and authorize the app.<br><br>
-            From there, you need to copy the first "code": section, through to the last " mark.<br><br>
-            Hit the back arrow and paste the code in to 'Refresh Token' and hit save
-        </p>
+        <span class="popup-label">
+            <h4>Spotify Premium is required for this app due to spotify restrictions</h4>
+            <p> To get started, head to </p>
+            <p class="popup-link">https://developer.spotify.com/dashboard/</p>
+            <p>in a browser and sign in. From there, create an app and add a name and description of your choice.
+                <br>Then add <br>
+            </p>
+            <p id="local-redirect-uri" class="popup-link">https://oliemanq.github.io/DisplayPlusMusic/</p>
+            <p>as a Redirect URI and select 'Web API' at the bottom. <br>
+                Finally, copy your client ID and client secret from there and paste them below.</p>
+        </span>
 
-        <span id="login-page-link" style="display: none;"></span>
 
-        <button class="small-button dark" id="open-login-page">
-            Open login page
-        </button>
-        <button class="small-button" id="copy-login-link">Copy Link</button>
+        <input class="popup-input" id="client-id" placeholder="Client ID">
+        <input class="popup-input" type="password" id="client-secret" placeholder="Client Secret">
 
         <span id="spacer"></span>
 
-        <input class="popup-input" id="refresh-token" placeholder="Refresh Token">
-        <button class="small-button accent" id="save-refresh-token">Save</button>
+        <button class="small-button accent" id="save-auth">Save & Authorize</button>
     </div>
 
     <style>
@@ -120,13 +125,40 @@
             gap: 12px;
 
             border-radius: 6px 6px 0 0;
-            font-size: 40px;
+            font-size: 36px;
 
             background: var(--background);
             box-shadow: 0 0 0 1000vw rgba(0, 0, 0, 0.5);
 
             transform: translateY(100%);
             animation: slideUp 0.6s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+        }
+
+        .popup-title {
+            font-weight: bold;
+            font-size: 48px;
+        }
+
+        .popup-link {
+            background-color: var(--accent);
+            color: var(--text-dark);
+
+            padding-left: 10px;
+            padding-right: 10px;
+
+            margin-left: 90px;
+            margin-right: 90px;
+            margin-top: 10px;
+            margin-bottom: 10px;
+
+            border-radius: 6px;
+
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .popup-link:active {
+            opacity: 0.5;
         }
 
         .popup-label {
@@ -186,7 +218,8 @@
             gap: 12px;
         }
 
-        #album-art-container {
+        #album-art-container,
+        #lyrics-container {
             margin: 12px;
             padding-left: 48px;
             border-radius: 6px;
@@ -196,6 +229,10 @@
             justify-content: left;
             font-size: 24px;
             background-color: var(--button-foreground-light);
+        }
+
+        #lyrics-container {
+            flex-direction: column;
         }
 
         .subcontainer {
@@ -277,11 +314,11 @@
             color: var(--button-foreground-dark)
         }
 
-        #save-refresh-token {
+        #save-auth {
             background-color: var(--accent);
             color: var(--text)
         }
-    </style>
+    </style>
 </body>
 
 </html>

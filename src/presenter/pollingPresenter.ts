@@ -6,6 +6,7 @@ class PollingPresenter {
     pollingtimeAPIs: number = 500;
     pollingtimeLyrics: number = 100;
     private isPolling = false;
+    private isPollingAPIs = false;
     private apiTimeout: number | undefined;
     private lyricsTimeout: number | undefined;
 
@@ -25,7 +26,8 @@ class PollingPresenter {
     }
 
     private async pollAPIs() {
-        if (!this.isPolling) return;
+        if (!this.isPolling || this.isPollingAPIs) return;
+        this.isPollingAPIs = true;
 
         try {
             await spotifyPresenter.pollSingle();
@@ -37,6 +39,8 @@ class PollingPresenter {
             }
         } catch (error) {
             console.error("Error polling APIs:", error);
+        } finally {
+            this.isPollingAPIs = false;
         }
 
         if (this.isPolling) {

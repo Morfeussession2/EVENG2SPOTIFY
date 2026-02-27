@@ -68,30 +68,42 @@ class Song {
         this.songChanged = !this.songChanged
     }
     createPlaybackBar(maxWidth: number): string {
-        let value = this.progressSeconds;
-        let max = this.durationSeconds;
-        let progressPercent = value / max;
-        let maxUnderscores = 64;
-        let maxDashes = 57;
-        let maxVerticalBar = 144;
-        let maxArrows = 57;
+        const value = this.progressSeconds;
+        const max = this.durationSeconds || 1;
+        const progressPercent = Math.min(1, Math.max(0, value / max));
 
-        let underscoreWidth = maxWidth / maxUnderscores;
-        let dashWidth = maxWidth / maxDashes;
-        let barWidth = maxWidth / maxVerticalBar;
-        let arrowWidth = maxWidth / maxArrows;
+        // 🔒 tamanho TOTAL fixo do player
+        const TOTAL_LENGTH = 18;
 
-        let maxWidthTrue = maxWidth - (arrowWidth * 2) - (this.isPlaying ? 0 : barWidth * 3);
+        const prefix = this.isPlaying ? "" : "|| ";
+        const suffix = "|";
 
-        let maxDashCount = Math.floor(progressPercent * maxDashes);
-        let maxUnderscoreCount = Math.floor((1 - progressPercent) * maxUnderscores);
+        // espaço total disponível para barra + cursor
+        const barArea =
+            TOTAL_LENGTH -
+            prefix.length -
+            suffix.length;
 
-        let dashCount = Math.floor(maxDashCount * (maxWidthTrue / maxWidth));
-        let underscoreCount = Math.floor(maxUnderscoreCount * (maxWidthTrue / maxWidth));
-        while ((dashCount * dashWidth) + (underscoreCount * underscoreWidth) > maxWidthTrue) {
-            dashCount -= 1;
+        // cursor ocupa 1 caractere fixo
+        const cursorWidth = 1;
+
+        // barra real (preenchida + vazia)
+        const barWidth = barArea - cursorWidth;
+
+        if (barWidth <= 0) {
+            return prefix + suffix;
         }
-        return (this.isPlaying ? "" : "|| ") + "<" + "-".repeat(dashCount) + "|" + "_".repeat(underscoreCount) + ">";
+
+        const filledCount = Math.floor(progressPercent * barWidth);
+        const emptyCount = barWidth - filledCount;
+
+        return (
+            prefix +
+            "▄".repeat(filledCount) +
+            " " +
+            "▁".repeat(emptyCount) +
+            suffix
+        );
     }
 }
 

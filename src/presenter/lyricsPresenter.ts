@@ -1,7 +1,31 @@
 import { fetchLyrics } from "../model/lyricsModel";
-import { formatTime } from "../Scripts/formatTime";
 import Song from "../model/songModel";
 import spotifyPresenter from "./spotifyPresenter";
+
+/**
+ * Display suporta apenas TEXTO PURO.
+ * Fade, negrito e tamanho são SIMULADOS via caracteres.
+ */
+
+// ===== VISUAL HELPERS =====
+
+// Linha principal (simula negrito + maior)
+const emphasize = (text: string) => {
+    if (!text) return "";
+    return "  " + text.toUpperCase();
+};
+
+// Linha próxima (fade médio)
+const fadeMedium = (text: string) => {
+    if (!text) return "";
+    return "· " + text.toLowerCase();
+};
+
+// Linha anterior (fade fraco)
+const fadeWeak = (text: string) => {
+    if (!text) return "";
+    return "  " + text.toLowerCase();
+};
 
 class LyricsPresenter {
     currentTrackSongID: string = "";
@@ -12,34 +36,39 @@ class LyricsPresenter {
     nextTrackLyrics: string = "";
     nextTrackSyncedLyrics: string = "";
 
+    prevLine: string = "";
     currentLine: string = "";
     nextLine: string = "";
 
     async updateLyrics(song: Song) {
         if (this.currentTrackSongID === song.songID) return;
 
-        // If the new song is what we cached as the exact next song, swap them in
-        if (this.nextTrackSongID === song.songID && this.nextTrackSyncedLyrics) {
+        if (
+            this.nextTrackSongID === song.songID &&
+            this.nextTrackSyncedLyrics
+        ) {
             this.currentTrackSongID = this.nextTrackSongID;
             this.currentTrackLyrics = this.nextTrackLyrics;
             this.currentTrackSyncedLyrics = this.nextTrackSyncedLyrics;
             return;
         }
 
-        // Otherwise fetch fresh
         this.currentTrackSongID = song.songID;
 
-        let lyrics = await fetchLyrics(song);
-
+        const lyrics = await fetchLyrics(song);
         this.currentTrackLyrics = lyrics.plainLyrics;
         this.currentTrackSyncedLyrics = lyrics.syncedLyrics;
     }
 
     async cacheNextLyrics(nextSong?: Song) {
-        if (!nextSong || this.nextTrackSongID === nextSong.songID || this.currentTrackSongID === nextSong.songID) return;
+        if (
+            !nextSong ||
+            this.nextTrackSongID === nextSong.songID ||
+            this.currentTrackSongID === nextSong.songID
+        ) return;
 
         this.nextTrackSongID = nextSong.songID;
-        let lyrics = await fetchLyrics(nextSong);
+        const lyrics = await fetchLyrics(nextSong);
 
         this.nextTrackLyrics = lyrics.plainLyrics;
         this.nextTrackSyncedLyrics = lyrics.syncedLyrics;
@@ -47,14 +76,13 @@ class LyricsPresenter {
 
     async updateLyricsLine() {
         if (!spotifyPresenter.currentSong || !this.currentTrackSyncedLyrics) {
-            this.currentLine = "No Lyrics Found";
+            this.prevLine = "";
+            this.currentLine = "NO LYRICS FOUND";
             this.nextLine = "";
-            document.getElementById('current-lyric-line')!.textContent = this.currentLine;
-            document.getElementById('next-lyric-line')!.textContent = this.nextLine;
             return;
         }
 
-        const lines = this.currentTrackSyncedLyrics.split('\n');
+        const lines = this.currentTrackSyncedLyrics.split("\n");
         const parsedLines: { time: number; text: string }[] = [];
 
         for (const line of lines) {
@@ -62,22 +90,23 @@ class LyricsPresenter {
             if (match) {
                 const text = match[3].trim();
                 if (text) {
-                    const minutes = parseInt(match[1]);
+                    const minutes = parseInt(match[1], 10);
                     const seconds = parseFloat(match[2]);
                     parsedLines.push({
                         time: minutes * 60 + seconds,
-                        text: text
+                        text
                     });
                 }
             }
         }
 
-        // Bluetooth delay in seconds (100ms = 0.1s)
         const BLUETOOTH_DELAY = 0.1;
+        const progress = Math.max(
+            0,
+            spotifyPresenter.currentSong.progressSeconds - BLUETOOTH_DELAY
+        );
 
-        const progress = Math.max(0, spotifyPresenter.currentSong.progressSeconds - BLUETOOTH_DELAY);
         let currentIndex = -1;
-
         for (let i = 0; i < parsedLines.length; i++) {
             if (progress >= parsedLines[i].time) {
                 currentIndex = i;
@@ -87,15 +116,24 @@ class LyricsPresenter {
         }
 
         if (currentIndex === -1) {
+            this.prevLine = "";
             this.currentLine = "";
-            this.nextLine = parsedLines.length > 0 ? `[${formatTime(parsedLines[0].time)}] ${parsedLines[0].text}` : "";
-            document.getElementById('current-lyric-line')!.textContent = this.currentLine;
-            document.getElementById('next-lyric-line')!.textContent = this.nextLine;
+            this.nextLine =
+                parsedLines.length > 0
+                    ? fadeMedium(parsedLines[0].text)
+                    : "";
         } else {
-            this.currentLine = `[${formatTime(parsedLines[currentIndex].time)}] ${parsedLines[currentIndex].text}`;
-            this.nextLine = currentIndex + 1 < parsedLines.length ? `[${formatTime(parsedLines[currentIndex + 1].time)}] ${parsedLines[currentIndex + 1].text}` : "";
-            document.getElementById('current-lyric-line')!.textContent = this.currentLine;
-            document.getElementById('next-lyric-line')!.textContent = this.nextLine;
+            this.prevLine =
+                currentIndex > 0
+                    ? fadeWeak(parsedLines[currentIndex - 1].text)
+                    : "";
+
+            this.currentLine = emphasize(parsedLines[currentIndex].text);
+
+            this.nextLine =
+                currentIndex + 1 < parsedLines.length
+                    ? fadeMedium(parsedLines[currentIndex + 1].text)
+                    : "";
         }
     }
 }

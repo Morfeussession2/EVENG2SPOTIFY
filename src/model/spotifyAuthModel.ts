@@ -3,10 +3,7 @@ import { storage } from '../utils/storage';
 class SpotifyAuthModel {
     // Generate the redirect URI. Spotify strictly forbids HTTP IP addresses other than 127.0.0.1.
     get REDIRECT_URI() {
-        if (window.location.hostname === '127.0.0.1') {
-            return "http://127.0.0.1:5173/";
-        }
-        return "https://oliemanq.github.io/DisplayPlusMusic/";
+        return window.location.origin + "/";
     }
     SCOPES = 'user-modify-playback-state user-read-playback-state';
 

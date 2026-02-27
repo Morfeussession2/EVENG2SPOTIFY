@@ -16,6 +16,7 @@ class ViewPresenter {
     }
 
     async saveAndAuthorize() {
+        console.log("saveAndAuthorize clicked");
         const clientId = (document.getElementById('client-id') as HTMLInputElement).value.trim();
         const clientSecret = (document.getElementById('client-secret') as HTMLInputElement).value.trim();
 
@@ -24,9 +25,11 @@ class ViewPresenter {
             return;
         }
 
+        console.log("Saving client data...");
         await storage.setItem('spotify_client_id', clientId);
         await storage.setItem('spotify_client_secret', clientSecret);
 
+        console.log("Generating Auth URL...");
         spotifyAuthModel.generateAuthUrl(clientId);
     }
 

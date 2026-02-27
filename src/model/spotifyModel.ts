@@ -111,10 +111,7 @@ export { initSpotify };
 
 class SpotifyModel {
     get REDIRECT_URI() {
-        if (window.location.hostname === '127.0.0.1') {
-            return "http://127.0.0.1:5173/";
-        }
-        return "https://oliemanq.github.io/DisplayPlusMusic/";
+        return window.location.origin + "/";
     }
     CLIENT_ID = "";
     SCOPE = ['user-modify-playback-state', 'user-read-playback-state'];
@@ -128,6 +125,10 @@ class SpotifyModel {
     placeholder_duration = 0;
 
     async fetchNextTrack(): Promise<Song | undefined> {
+        if (!spotifysdk || !spotifysdk.player) {
+            console.warn("Spotify SDK or player not initialized.");
+            return undefined;
+        }
         try {
             const queueResponse = await spotifysdk.player.getUsersQueue();
             if (queueResponse && queueResponse.queue && queueResponse.queue.length > 0) {
@@ -153,10 +154,15 @@ class SpotifyModel {
         }
     }
 
-    async fetchCurrentTrack(): Promise<Song> {
+    async fetchCurrentTrack(): Promise<Song | undefined> {
+        if (!spotifysdk || !spotifysdk.player) {
+            console.warn("Spotify SDK or player not initialized.");
+            return undefined;
+        }
         let result;
         try {
-            result = await spotifysdk.player.getPlaybackState();
+            const playbackState = await spotifysdk.player.getPlaybackState();
+            result = playbackState; // Assign playbackState to result to match original logic
             if (result && result.device && result.device.id) {
                 if (this.deviceId !== result.device.id) {
                     console.log("Updated device ID from " + this.deviceId + " to " + result.device.id);

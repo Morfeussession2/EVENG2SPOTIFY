@@ -62,13 +62,22 @@ async function createView(songIn: Song) {
             })
         })
 
+        const playbackBarStr = songIn.createPlaybackBar(MAX_WIDTH - 150);
+        const startTime = formatTime(songIn.progressSeconds);
+        const endTime = formatTime(songIn.durationSeconds);
+        const prefixLen = songIn.isPlaying ? 0 : 3;
+        // The bar in songModel has fixed TOTAL_LENGTH = 20
+        const barTargetLen = 59;
+        let timeLine = " ".repeat(prefixLen) + startTime;
+        const spacesNeeded = Math.max(1, (barTargetLen + 3) - timeLine.length - endTime.length);
+        timeLine += " ".repeat(spacesNeeded) + endTime;
 
-        const songInfoText = songIn.title + "\n" + songIn.artist + "\n" + songIn.album;
+        const songInfoText = songIn.title + "\n" + songIn.artist + "\n" + playbackBarStr + "\n" + timeLine;
         const songInfo = new TextContainerProperty({
             xPosition: 200,
-            yPosition: 25,
+            yPosition: 15,
             width: MAX_WIDTH - (200),
-            height: 90,
+            height: 110,
             borderRdaius: 6,
             borderWidth: 1,
             containerID: 3,
@@ -78,13 +87,12 @@ async function createView(songIn: Song) {
         });
 
 
-        const playbackBarText = formatTime(songIn.progressSeconds) + " / " + formatTime(songIn.durationSeconds) + "\n" + songIn.createPlaybackBar(MAX_WIDTH) + "\n  " + lyricsPresenter.currentLine + "\n    " + lyricsPresenter.nextLine;
-        // const playbackBarText = "<".repeat(57);
+        const playbackBarText = lyricsPresenter.prevLine + "\n" + lyricsPresenter.currentLine + "\n" + lyricsPresenter.nextLine;
         const playbackBar = new TextContainerProperty({
             xPosition: 0,
             yPosition: 130,
             width: MAX_WIDTH,
-            height: 240,
+            height: 158,
             borderRdaius: 6,
             borderWidth: 1,
             containerID: 4,

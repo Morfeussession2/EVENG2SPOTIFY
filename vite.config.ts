@@ -5,5 +5,5 @@ export default defineConfig(({ command }) => ({
     host: '0.0.0.0',
     allowedHosts: true,
   },
-  base: command === 'serve' ? '/' : '/DisplayPlusMusic/',
+  base: '/',
 }));

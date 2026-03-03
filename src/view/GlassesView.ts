@@ -87,7 +87,7 @@ async function createView(songIn: Song) {
         });
 
 
-        const playbackBarText = lyricsPresenter.prevLine + "\n" + lyricsPresenter.currentLine + "\n" + lyricsPresenter.nextLine;
+        const playbackBarText = lyricsPresenter.currentLine + "\n" + lyricsPresenter.nextLine;
         const playbackBar = new TextContainerProperty({
             xPosition: 0,
             yPosition: 130,

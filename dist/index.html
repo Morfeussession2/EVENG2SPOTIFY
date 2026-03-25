@@ -6,7 +6,7 @@
     <title>Even Realities App</title>
     <meta http-equiv="Content-Security-Policy"
         content="script-src 'self' 'unsafe-inline' https://accounts.scdn.co https://sdk.scdn.co blob:; worker-src 'self' blob:;" />
-  <script type="module" crossorigin src="/DisplayPlusMusic/assets/index-DoHQ0PGk.js"></script>
+  <script type="module" crossorigin src="./index-BUd6ZNvk.js"></script>
 </head>
 
 <body>
@@ -37,6 +37,9 @@
         <p id='next-lyric-line'></p>
     </span>
     <span id="small-button-container" class="container">
+        <div id="spotify-user"
+            style="font-size: 20px; font-weight: bold; margin-bottom: 10px; width: 100%; text-align: center; color: var(--text-dark); opacity: 0.7;">
+        </div>
         <button class="small-button danger" id="clear-local-refresh-token">Logout</button>
     </span>
 
@@ -52,7 +55,7 @@
             <p>in a browser and sign in. From there, create an app and add a name and description of your choice.
                 <br>Then add <br>
             </p>
-            <p id="local-redirect-uri" class="popup-link">https://oliemanq.github.io/DisplayPlusMusic/</p>
+            <p id="local-redirect-uri" class="popup-link"></p>
             <p>as a Redirect URI and select 'Web API' at the bottom. <br>
                 Finally, copy your client ID and client secret from there and paste them below.</p>
         </span>

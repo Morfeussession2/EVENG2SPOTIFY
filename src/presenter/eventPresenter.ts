@@ -23,6 +23,11 @@ export async function eventHandler() {
             console.log(event.textEvent.eventType);
         } else if (event.sysEvent) {
             console.log(event.sysEvent.eventType);
+            // Double click event is type 3
+            if (event.sysEvent.eventType === 3) {
+                console.log("Double click recognized! Shutting down container...");
+                bridge.shutDownPageContainer(1);
+            }
         } else {
             console.log("Audio event");
         }

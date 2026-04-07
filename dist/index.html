@@ -6,6 +6,11 @@
     <title>Even Realities App</title>
     <meta http-equiv="Content-Security-Policy"
         content="script-src 'self' 'unsafe-inline' https://accounts.scdn.co https://sdk.scdn.co blob:; worker-src 'self' blob:;" />
+    <script>
+        if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+            window.location.href = "https://eveng-2-spotify.vercel.app/";
+        }
+    </script>
   <script type="module" crossorigin src="./index-BUd6ZNvk.js"></script>
 </head>
 

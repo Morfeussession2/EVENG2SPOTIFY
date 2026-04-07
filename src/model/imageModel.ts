@@ -59,15 +59,48 @@ class ImageModel {
     const data = imageData.data;
 
     const grayscaleData = new Uint8Array(width * height);
+    const luminanceData = new Float32Array(width * height);
 
     for (let i = 0; i < width * height; i++) {
       const offset = i * 4;
       const r = data[offset];
       const g = data[offset + 1];
       const b = data[offset + 2];
+      
       // Standard grayscale formula
-      const avg = 0.299 * r + 0.587 * g + 0.114 * b;
-      grayscaleData[i] = avg;
+      let luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+
+      // User preference: the darker the better (gamma < 1)
+      const gamma = 0.5;
+      luminanceData[i] = 255 * Math.pow(luminance / 255, 1 / gamma);
+    }
+
+    // Apply 16-level (4-bit) Floyd-Steinberg dithering for smooth gradients
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const i = y * width + x;
+        const oldPixel = luminanceData[i];
+
+        // Quantize to 16 levels (15 steps: 255 / 15 = 17)
+        const newPixel = Math.max(0, Math.min(255, Math.round(oldPixel / 17) * 17));
+        grayscaleData[i] = newPixel;
+
+        const quantError = oldPixel - newPixel;
+
+        // Diffuse the error to neighboring pixels (right, bottom-left, bottom, bottom-right)
+        if (x + 1 < width) {
+          luminanceData[i + 1] += quantError * 7 / 16;
+        }
+        if (y + 1 < height) {
+          if (x - 1 >= 0) {
+            luminanceData[(y + 1) * width + (x - 1)] += quantError * 3 / 16;
+          }
+          luminanceData[(y + 1) * width + x] += quantError * 5 / 16;
+          if (x + 1 < width) {
+            luminanceData[(y + 1) * width + (x + 1)] += quantError * 1 / 16;
+          }
+        }
+      }
     }
 
     return encodeGrayscalePng(width, height, grayscaleData);
